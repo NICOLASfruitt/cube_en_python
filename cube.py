@@ -1,11 +1,12 @@
 import tkinter as tk
 from math import cos, sin, pi
+from turtle import bgcolor
 
 w = tk.Tk()
-w.title('qomp')
+w.title('le cube')
 
 size = 800
-canvas = tk.Canvas(w, width=size, height=size)
+canvas = tk.Canvas(w, width=size, height=size, bg='black')
 canvas.pack()
 
 def cube(s):
@@ -22,34 +23,27 @@ def main():
     a = 0
     b = 0
     loop(a, b)
+    w.mainloop()
     
 
 def loop(a, b):
     canvas.delete('all')
     
     c = cube(.3 * size)
-    m = multiply_matrices(translation(.5*size, .5*size, 0), multiply_matrices(rotation_x(a), rotation_y(b)))
+    m = multiply_matrices(translation(.5*size, .5*size, 0), rotation_x(a), rotation_y(b))
     
     for i in range(6*4):
         c[i] = apply_matrix(m, [c[i][0], c[i][1], c[i][2], 1])
     
     for i in range(6):
-        canvas.create_line(c[4*i + 0][0], c[4*i + 0][1], c[4*i + 1][0], c[4*i + 1][1])
-        canvas.create_line(c[4*i + 1][0], c[4*i + 1][1], c[4*i + 2][0], c[4*i + 2][1])
-        canvas.create_line(c[4*i + 2][0], c[4*i + 2][1], c[4*i + 3][0], c[4*i + 3][1])
-        canvas.create_line(c[4*i + 3][0], c[4*i + 3][1], c[4*i + 0][0], c[4*i + 0][1])
+        canvas.create_line(c[4*i + 0][0], c[4*i + 0][1], c[4*i + 1][0], c[4*i + 1][1], fill='white')
+        canvas.create_line(c[4*i + 1][0], c[4*i + 1][1], c[4*i + 2][0], c[4*i + 2][1], fill='white')
+        canvas.create_line(c[4*i + 2][0], c[4*i + 2][1], c[4*i + 3][0], c[4*i + 3][1], fill='white')
+        canvas.create_line(c[4*i + 3][0], c[4*i + 3][1], c[4*i + 0][0], c[4*i + 0][1], fill='white')
 
-    a += pi/200
-    b += pi/100
-    canvas.after(10, loop, a, b)
-
-def identity():
-    return [
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    ]
+    a += pi/256
+    b += pi/128
+    canvas.after(20, loop, a, b)
 
 def translation(dx, dy, dz):
     return [
@@ -100,7 +94,14 @@ def apply_matrix(m, v):
         )
     return result
 
-def multiply_matrices(m1, m2):
+def multiply_matrices(*m):
+    result = m[0]
+    for i in range(1, len(m)):
+        result = _multiply_matrices(result, m[i])
+    return result
+
+
+def _multiply_matrices(m1, m2):
     result = [0 for i in range(16)]
     for i in range(4):
         for j in range(4):
