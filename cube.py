@@ -1,11 +1,11 @@
 import tkinter as tk
 from math import cos, sin, pi
-from turtle import bgcolor
 
 w = tk.Tk()
 w.title('le cube')
 
 size = 800
+
 canvas = tk.Canvas(w, width=size, height=size, bg='black')
 canvas.pack()
 
@@ -30,10 +30,12 @@ def loop(a, b):
     canvas.delete('all')
     
     c = cube(.3 * size)
-    m = multiply_matrices(translation(.5*size, .5*size, 0), rotation_x(a), rotation_y(b))
+    m = multiply_matrices(rotation_y(b))
     
     for i in range(6*4):
-        c[i] = apply_matrix(m, [c[i][0], c[i][1], c[i][2], 1])
+        v = apply_matrix(m, [c[i][0], c[i][1], c[i][2], 1])
+        z = 2 + 2*v[2]/size * 1.5
+        c[i] = apply_matrix(projection(size//2, size//2, size//2), [v[0]/z, v[1]/z, v[2], 1])
     
     for i in range(6):
         canvas.create_line(c[4*i + 0][0], c[4*i + 0][1], c[4*i + 1][0], c[4*i + 1][1], fill='white')
@@ -44,6 +46,14 @@ def loop(a, b):
     a += pi/256
     b += pi/128
     canvas.after(20, loop, a, b)
+
+def projection(width, height, depth):
+    return [
+        1, 0, 0, width,
+        0, -1, 0, height,
+        0, 0, 1, depth,
+        0, 0, 0, 1
+    ]
 
 def translation(dx, dy, dz):
     return [
