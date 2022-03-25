@@ -2,6 +2,7 @@ import tkinter as tk
 from math import cos, sin, pi
 
 w = tk.Tk()
+w.config(bg='black')
 w.title('le cube')
 
 size = 800
@@ -20,32 +21,47 @@ def cube(s):
     ]
 
 def main():
+    alpha = pi/2
     a = 0
     b = 0
-    loop(a, b)
+    loop(alpha, a, b)
     w.mainloop()
     
+def to_hex(x):
+    h = hex(abs(int(x)))[2:]
+    if len(h) < 2:
+        return '0' + h
+    return h
 
-def loop(a, b):
+def loop(alpha, a, b):
     canvas.delete('all')
+
+    dx = 255*cos(alpha)
+    dy = 255*sin(alpha)
     
     c = cube(.3 * size)
-    m = multiply_matrices(rotation_y(b))
+    m = multiply_matrices(translation(dx, dy, 0), rotation_x(a), rotation_y(b))
     
     for i in range(6*4):
         v = apply_matrix(m, [c[i][0], c[i][1], c[i][2], 1])
-        z = 2 + 2*v[2]/size * 1.5
+        z = 2 + 2*v[2]/size * .8
         c[i] = apply_matrix(projection(size//2, size//2, size//2), [v[0]/z, v[1]/z, v[2], 1])
     
     for i in range(6):
-        canvas.create_line(c[4*i + 0][0], c[4*i + 0][1], c[4*i + 1][0], c[4*i + 1][1], fill='white')
-        canvas.create_line(c[4*i + 1][0], c[4*i + 1][1], c[4*i + 2][0], c[4*i + 2][1], fill='white')
-        canvas.create_line(c[4*i + 2][0], c[4*i + 2][1], c[4*i + 3][0], c[4*i + 3][1], fill='white')
-        canvas.create_line(c[4*i + 3][0], c[4*i + 3][1], c[4*i + 0][0], c[4*i + 0][1], fill='white')
+        canvas.create_polygon(c[4*i + 0][0], c[4*i + 0][1],
+                              c[4*i + 1][0], c[4*i + 1][1],
+                              c[4*i + 2][0], c[4*i + 2][1],
+                              c[4*i + 3][0], c[4*i + 3][1],
+                              fill='#{}{}ff'.format(to_hex(dx), to_hex(dy)))
+        #canvas.create_line(c[4*i + 0][0], c[4*i + 0][1], c[4*i + 1][0], c[4*i + 1][1], fill='white')
+        #canvas.create_line(c[4*i + 1][0], c[4*i + 1][1], c[4*i + 2][0], c[4*i + 2][1], fill='white')
+        #canvas.create_line(c[4*i + 2][0], c[4*i + 2][1], c[4*i + 3][0], c[4*i + 3][1], fill='white')
+        #canvas.create_line(c[4*i + 3][0], c[4*i + 3][1], c[4*i + 0][0], c[4*i + 0][1], fill='white')
 
+    alpha += pi/64
     a += pi/256
     b += pi/128
-    canvas.after(20, loop, a, b)
+    canvas.after(20, loop, alpha, a, b)
 
 def projection(width, height, depth):
     return [
