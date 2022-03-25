@@ -12,56 +12,63 @@ canvas.pack()
 
 def cube(s):
     return [
-        [-s,-s, s], [-s, s, s], [ s, s, s], [ s,-s, s],
-        [-s,-s,-s], [-s, s,-s], [ s, s,-s], [ s,-s,-s],
-        [ s,-s, s], [ s, s, s], [ s, s,-s], [ s,-s,-s],
-        [-s,-s,-s], [ s,-s,-s], [ s,-s, s], [-s,-s, s],
-        [-s,-s,-s], [-s,-s, s], [-s, s, s], [-s, s,-s],
-        [ s, s, s], [ s, s,-s], [-s, s,-s], [-s, s, s]
+        (-s,-s, s), (-s, s, s), ( s,-s, s), # Front
+        (-s, s, s), ( s, s, s), ( s,-s, s),
+
+        ( s,-s,-s), ( s, s,-s), (-s,-s,-s), # Back
+        ( s, s,-s), (-s, s,-s), (-s,-s,-s),
+
+        (-s, s, s), (-s, s,-s), ( s, s, s), # Top
+        (-s, s,-s), ( s, s,-s), ( s, s, s),
+
+        (-s,-s,-s), (-s,-s, s), ( s,-s,-s), # Bottom
+        (-s,-s, s), ( s,-s, s), ( s,-s,-s),
+
+        ( s,-s, s), ( s, s, s), ( s,-s,-s), # Right
+        ( s, s, s), ( s, s,-s), ( s,-s,-s),
+
+        (-s,-s,-s), (-s, s,-s), (-s,-s, s), # Left
+        (-s, s,-s), (-s, s, s), (-s,-s, s)
     ]
 
 def main():
+    c = cube(.3 * size)
     alpha = pi/2
     a = 0
     b = 0
-    loop(alpha, a, b)
-    w.mainloop()
-    
-def to_hex(x):
-    h = hex(abs(int(x)))[2:]
-    if len(h) < 2:
-        return '0' + h
-    return h
 
-def loop(alpha, a, b):
+    update(c, alpha, a, b)
+    w.mainloop()
+
+def update(vertices: list[tuple], alpha, a, b):
     canvas.delete('all')
 
-    dx = 255*cos(alpha)
-    dy = 255*sin(alpha)
-    
-    c = cube(.3 * size)
+    dx = 300*cos(alpha)
+    dy = 300*sin(alpha)
     m = multiply_matrices(translation(dx, dy, 0), rotation_x(a), rotation_y(b))
-    
-    for i in range(6*4):
-        v = apply_matrix(m, [c[i][0], c[i][1], c[i][2], 1])
+    buff = []
+
+    for i in range(len(vertices)):
+        v = apply_matrix(m, [vertices[i][0], vertices[i][1], vertices[i][2], 1])
         z = 2 + 2*v[2]/size * .8
-        c[i] = apply_matrix(projection(size//2, size//2, size//2), [v[0]/z, v[1]/z, v[2], 1])
+        v[0] /= z
+        v[1] /= z
+        buff.append(apply_matrix(projection(size//2, size//2, size//2), v))
     
-    for i in range(6):
-        canvas.create_polygon(c[4*i + 0][0], c[4*i + 0][1],
-                              c[4*i + 1][0], c[4*i + 1][1],
-                              c[4*i + 2][0], c[4*i + 2][1],
-                              c[4*i + 3][0], c[4*i + 3][1],
-                              fill='#{}{}ff'.format(to_hex(dx), to_hex(dy)))
-        #canvas.create_line(c[4*i + 0][0], c[4*i + 0][1], c[4*i + 1][0], c[4*i + 1][1], fill='white')
-        #canvas.create_line(c[4*i + 1][0], c[4*i + 1][1], c[4*i + 2][0], c[4*i + 2][1], fill='white')
-        #canvas.create_line(c[4*i + 2][0], c[4*i + 2][1], c[4*i + 3][0], c[4*i + 3][1], fill='white')
-        #canvas.create_line(c[4*i + 3][0], c[4*i + 3][1], c[4*i + 0][0], c[4*i + 0][1], fill='white')
+    for i in range(0, len(vertices), 3):
+        #canvas.create_polygon(buff[i + 0][0], buff[i + 0][1],
+        #                      buff[i + 1][0], buff[i + 1][1],
+        #                      buff[i + 2][0], buff[i + 2][1],
+        #                      fill='white')
+
+        canvas.create_line(buff[i + 0][0], buff[i + 0][1], buff[i + 1][0], buff[i + 1][1], fill='white')
+        canvas.create_line(buff[i + 1][0], buff[i + 1][1], buff[i + 2][0], buff[i + 2][1], fill='white')
+        canvas.create_line(buff[i + 2][0], buff[i + 2][1], buff[i + 0][0], buff[i + 0][1], fill='white')
 
     alpha += pi/64
     a += pi/256
     b += pi/128
-    canvas.after(20, loop, alpha, a, b)
+    canvas.after(20, update, vertices, alpha, a, b)
 
 def projection(width, height, depth):
     return [
