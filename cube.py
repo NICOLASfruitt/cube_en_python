@@ -1,5 +1,6 @@
 import tkinter as tk
 from math import cos, sin, pi
+from random import randint
 
 w = tk.Tk()
 w.config(bg='black')
@@ -32,15 +33,17 @@ def cube(s):
     ]
 
 def main():
-    c = cube(.3 * size)
+    vertex_buff = cube(.3 * size)
+    color_buff = ['#' + ''.join(['0123456789abcdef'[randint(0, 15)] for _ in range(6)]) for _ in range(len(vertex_buff)//3)]
+    
     alpha = pi/2
     a = 0
     b = 0
 
-    update(c, alpha, a, b)
+    update(vertex_buff, color_buff, alpha, a, b)
     w.mainloop()
 
-def update(vertices: list[tuple], alpha, a, b):
+def update(vertices, color_buff, alpha, a, b):
     canvas.delete('all')
 
     dx = 300*cos(alpha)
@@ -56,19 +59,22 @@ def update(vertices: list[tuple], alpha, a, b):
         buff.append(apply_matrix(projection(size//2, size//2, size//2), v))
     
     for i in range(0, len(vertices), 3):
-        #canvas.create_polygon(buff[i + 0][0], buff[i + 0][1],
-        #                      buff[i + 1][0], buff[i + 1][1],
-        #                      buff[i + 2][0], buff[i + 2][1],
-        #                      fill='white')
+        nz = z_normal(buff[i + 0], buff[i + 1], buff[i + 2])
+        if nz >= 0: continue
 
-        canvas.create_line(buff[i + 0][0], buff[i + 0][1], buff[i + 1][0], buff[i + 1][1], fill='white')
-        canvas.create_line(buff[i + 1][0], buff[i + 1][1], buff[i + 2][0], buff[i + 2][1], fill='white')
-        canvas.create_line(buff[i + 2][0], buff[i + 2][1], buff[i + 0][0], buff[i + 0][1], fill='white')
+        canvas.create_polygon(buff[i + 0][0], buff[i + 0][1],
+                              buff[i + 1][0], buff[i + 1][1],
+                              buff[i + 2][0], buff[i + 2][1],
+                              fill=color_buff[i//3])
+
+        #canvas.create_line(buff[i + 0][0], buff[i + 0][1], buff[i + 1][0], buff[i + 1][1], fill='white')
+        #canvas.create_line(buff[i + 1][0], buff[i + 1][1], buff[i + 2][0], buff[i + 2][1], fill='white')
+        #canvas.create_line(buff[i + 2][0], buff[i + 2][1], buff[i + 0][0], buff[i + 0][1], fill='white')
 
     alpha += pi/64
     a += pi/256
     b += pi/128
-    canvas.after(20, update, vertices, alpha, a, b)
+    canvas.after(20, update, vertices, color_buff, alpha, a, b)
 
 def projection(width, height, depth):
     return [
@@ -135,7 +141,7 @@ def multiply_matrices(*m):
 
 
 def _multiply_matrices(m1, m2):
-    result = [0 for i in range(16)]
+    result = [0 for _ in range(16)]
     for i in range(4):
         for j in range(4):
             result[4*j + i] =\
@@ -144,5 +150,12 @@ def _multiply_matrices(m1, m2):
                 m1[4*j + 2] * m2[i + 8] +\
                 m1[4*j + 3] * m2[i + 12]
     return result
+
+def z_normal(A, B, C):
+    ABx, ABy = B[0] - A[0], B[1] - A[1]
+    ACx, ACy = C[0] - A[0], C[1] - A[1]
+    
+    z = ABx*ACy - ABy*ACx
+    return z
 
 main()
