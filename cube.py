@@ -13,8 +13,6 @@ canvas.pack()
 
 class Player():
     def __init__(self, x, y, z):
-        self.face_x = x
-        self.face_y = y
         self.x = x
         self.y = y
         self.z = z
@@ -44,10 +42,10 @@ def color(n):
     return ['#' + ''.join(['0123456789abcdef'[randint(0, 15)] for _ in range(6)]) for _ in range(n)]
 
 def update_pos(key, pos):
-    if key == 'Right': pos.x = (pos.x + 50) % 300
-    elif key == 'Left': pos.x = (pos.x - 50) % 300
-    elif key == 'Up': pos.y = (pos.y + 50) % 300
-    elif key == 'Down': pos.y = (pos.y - 50) % 300
+    if key == 'Right':  pos.x = (pos.x + .05 * size) % (.3 * size)
+    elif key == 'Left': pos.x = (pos.x - .05 * size) % (.3 * size)
+    elif key == 'Up':   pos.y = (pos.y + .05 * size) % (.3 * size)
+    elif key == 'Down': pos.y = (pos.y - .05 * size) % (.3 * size)
 
 def main():
     player = Player(0, 0, .35 * size)
@@ -55,7 +53,7 @@ def main():
     player_color_buff = color(len(player_buff)//3)
     
     world_buff = cube(.3 * size)
-    world_color_buff = color(len(world_buff)//3)
+    world_color_buff = ['#696969', '#696969', '#ff0000', '#ff0000'] + ['#696969' for _ in range(len(world_buff)//3 - 4)] #color(len(world_buff)//3)
     
     alpha = pi/2
     a = 0
@@ -63,20 +61,20 @@ def main():
 
     w.bind('<Key>', lambda key: update_pos(key.keysym, player))
 
-    update(pos, player_buff, player_color_buff, world_buff, world_color_buff, a, b)
+    update(player, player_buff, player_color_buff, world_buff, world_color_buff, a, b)
     w.mainloop()
 
 def update(player, player_buff, player_color_buff, world_buff, world_color_buff, a, b):
     canvas.delete('all')
 
-    m = multiply_matrices(rotation_x(a), rotation_y(b))
+    m = multiply_matrices()
     player_m = multiply_matrices(m, translation(player.x, player.y, player.z))
     
     draw(world_buff, world_color_buff, m)
     draw(player_buff, player_color_buff, player_m)
 
     #alpha += pi/64
-    #a += pi/256
+    a += pi/256
     #b += pi/128
     canvas.after(20, update, player, player_buff, player_color_buff, world_buff, world_color_buff, a, b)
 
@@ -85,14 +83,14 @@ def draw(vertex_buff, color_buff, matrix):
     
     for i in range(len(vertex_buff)):
         v = apply_matrix(matrix, [vertex_buff[i][0], vertex_buff[i][1], vertex_buff[i][2], 1])
-        z = 2 + 2*v[2]/size * .8
+        z = 2 - 2*v[2]/size * .8
         v[0] /= z
         v[1] /= z
         buff.append(apply_matrix(projection(size//2, size//2, size//2), v))
 
     for i in range(0, len(vertex_buff), 3):
         nz = z_normal(buff[i + 0], buff[i + 1], buff[i + 2])
-        if nz >= 0: continue
+        if nz <= 0: continue
 
         canvas.create_polygon(buff[i + 0][0], buff[i + 0][1],
                               buff[i + 1][0], buff[i + 1][1],
@@ -161,6 +159,9 @@ def apply_matrix(m, v):
     return result
 
 def multiply_matrices(*m):
+    if len(m) == 0:
+        return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+
     result = m[0]
     for i in range(1, len(m)):
         result = _multiply_matrices(result, m[i])
