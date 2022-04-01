@@ -70,7 +70,7 @@ def main():
 def update(pos, player_buff, player_color_buff, world_buff, world_color_buff, a, b):
     canvas.delete('all')
 
-    m = multiply_matrices()
+    m = multiply_matrices(rotation_x(a))
     player_m = multiply_matrices(m, translation(pos.x, pos.y, pos.z))
     
     draw(world_buff, world_color_buff, m)
@@ -120,9 +120,9 @@ def translation(dx, dy, dz):
         0, 0, 0, 1
     ]
 
-def rotation_x(a):
-    c = cos(a)
-    s = sin(a)
+def rotation_x(angle):
+    c = cos(angle)
+    s = sin(angle)
     return [
         1, 0, 0, 0,
         0, c, s, 0,
@@ -130,9 +130,9 @@ def rotation_x(a):
         0, 0, 0, 1
     ]
 
-def rotation_y(a):
-    c = cos(a)
-    s = sin(a)
+def rotation_y(angle):
+    c = cos(angle)
+    s = sin(angle)
     return [
         c, 0, s, 0,
         0, 1, 0, 0,
@@ -140,9 +140,9 @@ def rotation_y(a):
         0, 0, 0, 1
     ]
 
-def rotation_z(a):
-    c = cos(a)
-    s = sin(a)
+def rotation_z(angle):
+    c = cos(angle)
+    s = sin(angle)
     return [
         c, s, 0, 0,
         -s, c, 0, 0,
