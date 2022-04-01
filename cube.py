@@ -6,7 +6,7 @@ w = tk.Tk()
 w.config(bg='black')
 w.title('le cube')
 
-size = 1000
+size = 800
 
 canvas = tk.Canvas(w, width=size, height=size, bg='black')
 canvas.pack()
@@ -42,10 +42,10 @@ def color(n):
     return ['#' + ''.join(['0123456789abcdef'[randint(0, 15)] for _ in range(6)]) for _ in range(n)]
 
 def update_pos(key, pos, w_size, p_size):
-    if key == 'Right':  pos.x = (w_size - p_size + pos.x + p_size) % (2 *  w_size - p_size)  - w_size + p_size
-    elif key == 'Left': pos.x = (w_size - p_size + pos.x - p_size) % (2 * (w_size - p_size)) - w_size + p_size
-    elif key == 'Up':   pos.y = (w_size - p_size + pos.y + p_size) % (2 *  w_size - p_size)  - w_size + p_size
-    elif key == 'Down': pos.y = (w_size - p_size + pos.y - p_size) % (2 * (w_size - p_size)) - w_size + p_size
+    if key == 'Right':  pos.x = (w_size - p_size + pos.x + p_size) % (2 * w_size - p_size) - w_size + p_size
+    elif key == 'Left': pos.x = (w_size - p_size + pos.x - p_size) % (2 * w_size - p_size) - w_size + p_size
+    elif key == 'Up':   pos.y = (w_size - p_size + pos.y + p_size) % (2 * w_size - p_size) - w_size + p_size
+    elif key == 'Down': pos.y = (w_size - p_size + pos.y - p_size) % (2 * w_size - p_size) - w_size + p_size
 
 def main():
     w_size = .3 * size
@@ -77,7 +77,7 @@ def update(pos, player_buff, player_color_buff, world_buff, world_color_buff, a,
     draw(player_buff, player_color_buff, player_m)
 
     #alpha += pi/64
-    a += pi/256
+    #a += pi/256
     #b += pi/128
     canvas.after(20, update, pos, player_buff, player_color_buff, world_buff, world_color_buff, a, b)
 
