@@ -6,12 +6,12 @@ w = tk.Tk()
 w.config(bg='black')
 w.title('le cube')
 
-size = 800
+size = 1000
 
 canvas = tk.Canvas(w, width=size, height=size, bg='black')
 canvas.pack()
 
-class Player():
+class Point():
     def __init__(self, x, y, z):
         self.x = x
         self.y = y
@@ -41,34 +41,37 @@ def cube(s):
 def color(n):
     return ['#' + ''.join(['0123456789abcdef'[randint(0, 15)] for _ in range(6)]) for _ in range(n)]
 
-def update_pos(key, pos):
-    if key == 'Right':  pos.x = (pos.x + .05 * size) % (.3 * size)
-    elif key == 'Left': pos.x = (pos.x - .05 * size) % (.3 * size)
-    elif key == 'Up':   pos.y = (pos.y + .05 * size) % (.3 * size)
-    elif key == 'Down': pos.y = (pos.y - .05 * size) % (.3 * size)
+def update_pos(key, pos, w_size, p_size):
+    if key == 'Right':  pos.x = (w_size - p_size + pos.x + p_size) % (2 *  w_size - p_size)  - w_size + p_size
+    elif key == 'Left': pos.x = (w_size - p_size + pos.x - p_size) % (2 * (w_size - p_size)) - w_size + p_size
+    elif key == 'Up':   pos.y = (w_size - p_size + pos.y + p_size) % (2 *  w_size - p_size)  - w_size + p_size
+    elif key == 'Down': pos.y = (w_size - p_size + pos.y - p_size) % (2 * (w_size - p_size)) - w_size + p_size
 
 def main():
-    player = Player(0, 0, .35 * size)
-    player_buff = cube(.05 * size)
+    w_size = .3 * size
+    p_size = .05 * size
+
+    world_buff = cube(w_size)
+    world_color_buff = ['#696969' for _ in range(len(world_buff)//3)]
+
+    pos = Point(0, 0, w_size + p_size)
+    player_buff = cube(p_size)
     player_color_buff = color(len(player_buff)//3)
-    
-    world_buff = cube(.3 * size)
-    world_color_buff = ['#696969', '#696969', '#ff0000', '#ff0000'] + ['#696969' for _ in range(len(world_buff)//3 - 4)] #color(len(world_buff)//3)
     
     alpha = pi/2
     a = 0
     b = 0
 
-    w.bind('<Key>', lambda key: update_pos(key.keysym, player))
+    w.bind('<Key>', lambda key: update_pos(key.keysym, pos, w_size, p_size))
 
-    update(player, player_buff, player_color_buff, world_buff, world_color_buff, a, b)
+    update(pos, player_buff, player_color_buff, world_buff, world_color_buff, a, b)
     w.mainloop()
 
-def update(player, player_buff, player_color_buff, world_buff, world_color_buff, a, b):
+def update(pos, player_buff, player_color_buff, world_buff, world_color_buff, a, b):
     canvas.delete('all')
 
     m = multiply_matrices()
-    player_m = multiply_matrices(m, translation(player.x, player.y, player.z))
+    player_m = multiply_matrices(m, translation(pos.x, pos.y, pos.z))
     
     draw(world_buff, world_color_buff, m)
     draw(player_buff, player_color_buff, player_m)
@@ -76,7 +79,7 @@ def update(player, player_buff, player_color_buff, world_buff, world_color_buff,
     #alpha += pi/64
     a += pi/256
     #b += pi/128
-    canvas.after(20, update, player, player_buff, player_color_buff, world_buff, world_color_buff, a, b)
+    canvas.after(20, update, pos, player_buff, player_color_buff, world_buff, world_color_buff, a, b)
 
 def draw(vertex_buff, color_buff, matrix):
     buff = []
