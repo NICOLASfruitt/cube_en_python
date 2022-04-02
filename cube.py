@@ -41,11 +41,11 @@ def cube(s):
 def color(n):
     return ['#' + ''.join(['0123456789abcdef'[randint(0, 15)] for _ in range(6)]) for _ in range(n)]
 
-def update_pos(key, pos, w_size, p_size):
-    if key == 'Right':  pos.x = (w_size - p_size + pos.x + p_size) % (2 * w_size - p_size) - w_size + p_size
-    elif key == 'Left': pos.x = (w_size - p_size + pos.x - p_size) % (2 * w_size - p_size) - w_size + p_size
-    elif key == 'Up':   pos.y = (w_size - p_size + pos.y + p_size) % (2 * w_size - p_size) - w_size + p_size
-    elif key == 'Down': pos.y = (w_size - p_size + pos.y - p_size) % (2 * w_size - p_size) - w_size + p_size
+def update_pos(key, pos, w_size, p_size, n):
+    if key == 'Right':  pos.x = (w_size - p_size + pos.x + p_size/n) % (2 * (w_size - p_size) + p_size/n) - w_size + p_size
+    elif key == 'Left': pos.x = (w_size - p_size + pos.x - p_size/n) % (2 * (w_size - p_size) + p_size/n) - w_size + p_size
+    elif key == 'Up':   pos.y = (w_size - p_size + pos.y + p_size/n) % (2 * (w_size - p_size) + p_size/n) - w_size + p_size
+    elif key == 'Down': pos.y = (w_size - p_size + pos.y - p_size/n) % (2 * (w_size - p_size) + p_size/n) - w_size + p_size
 
 def main():
     w_size = .3 * size
@@ -58,11 +58,10 @@ def main():
     player_buff = cube(p_size)
     player_color_buff = color(len(player_buff)//3)
     
-    alpha = pi/2
     a = 0
     b = 0
 
-    w.bind('<Key>', lambda key: update_pos(key.keysym, pos, w_size, p_size))
+    w.bind('<Key>', lambda key: update_pos(key.keysym, pos, w_size, p_size, 5))
 
     update(pos, player_buff, player_color_buff, world_buff, world_color_buff, a, b)
     w.mainloop()
@@ -70,15 +69,14 @@ def main():
 def update(pos, player_buff, player_color_buff, world_buff, world_color_buff, a, b):
     canvas.delete('all')
 
-    m = multiply_matrices(rotation_x(a))
+    m = multiply_matrices(rotation_x(a), rotation_y(b))
     player_m = multiply_matrices(m, translation(pos.x, pos.y, pos.z))
     
     draw(world_buff, world_color_buff, m)
     draw(player_buff, player_color_buff, player_m)
 
-    #alpha += pi/64
-    #a += pi/256
-    #b += pi/128
+    a += pi/2048
+    b += pi/4096
     canvas.after(20, update, pos, player_buff, player_color_buff, world_buff, world_color_buff, a, b)
 
 def draw(vertex_buff, color_buff, matrix):
