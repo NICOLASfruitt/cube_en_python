@@ -41,7 +41,7 @@ def cube(s):
 def color(n):
     return ['#' + ''.join(['0123456789abcdef'[randint(0, 15)] for _ in range(6)]) for _ in range(n)]
 
-def update_pos(key, pos, w_size, p_size, n):
+def update_pos(key, pos, w_size, p_size, n):    # n|p_size
     if key == 'Right':  pos.x = (w_size - p_size + pos.x + p_size/n) % (2 * (w_size - p_size) + p_size/n) - w_size + p_size
     elif key == 'Left': pos.x = (w_size - p_size + pos.x - p_size/n) % (2 * (w_size - p_size) + p_size/n) - w_size + p_size
     elif key == 'Up':   pos.y = (w_size - p_size + pos.y + p_size/n) % (2 * (w_size - p_size) + p_size/n) - w_size + p_size
